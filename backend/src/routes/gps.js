@@ -11,9 +11,11 @@ const router = express.Router()
 router.post('/update', authenticate, async (req, res, next) => {
   try {
     const { device_id, lat, lng, accuracy, speed, heading, battery, timestamp } = req.body
+    const numericLat = Number(lat)
+    const numericLng = Number(lng)
 
     // Validate required fields
-    if (!lat || !lng || !timestamp) {
+    if (!Number.isFinite(numericLat) || !Number.isFinite(numericLng) || !timestamp) {
       return res.status(400).json({ message: 'Latitude, longitude, and timestamp are required' })
     }
 
@@ -25,8 +27,8 @@ router.post('/update', authenticate, async (req, res, next) => {
       [
         req.courier.id,
         device_id || `courier_${req.courier.id}`,
-        lat,
-        lng,
+        numericLat,
+        numericLng,
         accuracy || null,
         speed || 0,
         heading || null,

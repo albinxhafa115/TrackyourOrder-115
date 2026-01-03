@@ -40,7 +40,14 @@ router.get('/:orderNumber', async (req, res, next) => {
 
     // Get current courier position (if delivery is active)
     let current_position = null
-    if (order.status === 'out_for_delivery' && order.courier_id) {
+    const liveStatuses = new Set([
+      'out_for_delivery',
+      'in_transit',
+      'in_transport',
+      'in_delivery',
+      'started',
+    ])
+    if (liveStatuses.has(order.status) && order.courier_id) {
       const posResult = await query(
         `SELECT lat, lng, speed, accuracy, timestamp, created_at
          FROM tracking_data

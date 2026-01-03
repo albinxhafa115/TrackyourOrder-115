@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import api from '../../services/api'
 import { formatDistance } from '../../utils/distance'
-import { format } from 'date-fns'
+import { format, isValid } from 'date-fns'
 
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl
@@ -20,6 +20,14 @@ const TrackingPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [autoRefresh, setAutoRefresh] = useState(true)
+
+  const formatDateValue = (value, pattern) => {
+    if (value === null || value === undefined) return 'N/A'
+    const numericValue = Number(value)
+    const date = Number.isFinite(numericValue) ? new Date(numericValue) : new Date(value)
+    if (!isValid(date)) return 'N/A'
+    return format(date, pattern)
+  }
 
   const fetchTrackingData = async () => {
     try {
@@ -216,7 +224,7 @@ const TrackingPage = () => {
                 <Marker position={[current_position.lat, current_position.lng]}>
                   <Popup>
                     Kurieri<br />
-                    Update: {format(new Date(current_position.timestamp), 'HH:mm:ss')}
+                    Update: {formatDateValue(current_position.timestamp, 'HH:mm:ss')}
                   </Popup>
                 </Marker>
 
@@ -242,7 +250,7 @@ const TrackingPage = () => {
               </MapContainer>
             </div>
             <div className="p-3 bg-gray-50 text-sm text-gray-600 text-center">
-              Update i fundit: {format(new Date(current_position.timestamp), 'HH:mm:ss')}
+              Update i fundit: {formatDateValue(current_position.timestamp, 'HH:mm:ss')}
             </div>
           </div>
         )}
@@ -279,7 +287,7 @@ const TrackingPage = () => {
                     </p>
                     <p className="text-sm text-gray-600">{event.description}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {format(new Date(event.created_at), 'dd MMM yyyy, HH:mm')}
+                      {formatDateValue(event.created_at, 'dd MMM yyyy, HH:mm')}
                     </p>
                   </div>
                 </div>

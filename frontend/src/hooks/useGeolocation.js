@@ -20,8 +20,8 @@ const useGeolocation = (options = {}) => {
 
   const defaultOptions = {
     enableHighAccuracy: true,
-    timeout: 5000,
-    maximumAge: 0,
+    timeout: 15000,
+    maximumAge: 5000,
     updateInterval: 30000, // 30 seconds
     ...options,
   }
@@ -35,7 +35,7 @@ const useGeolocation = (options = {}) => {
       return
     }
 
-    let lastUpdateTime = Date.now()
+    let lastUpdateTime = null
 
     // Success callback
     const onSuccess = (pos) => {
@@ -53,7 +53,7 @@ const useGeolocation = (options = {}) => {
 
       // Send to backend every updateInterval (30s)
       const now = Date.now()
-      if (now - lastUpdateTime >= defaultOptions.updateInterval) {
+      if (!lastUpdateTime || now - lastUpdateTime >= defaultOptions.updateInterval) {
         if (courier?.id) {
           sendGPSUpdate({
             device_id: courier.device_id || `courier_${courier.id}`,

@@ -1,13 +1,23 @@
 import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { MapContainer, Marker, Popup, TileLayer, Polyline } from 'react-leaflet'
+import L from 'leaflet'
 import useGeolocation from '../../hooks/useGeolocation'
 import { openCompletionModal } from '../../store/slices/deliverySlice'
 import { setCurrentOrder } from '../../store/slices/ordersSlice'
 import { calculateDistance, formatDistance } from '../../utils/distance'
 import { calculateETA, getETATimestamp } from '../../utils/eta'
-import { openNavigation, makeCall, shouldAutoCall } from '../../utils/navigation'
+import { makeCall, shouldAutoCall } from '../../utils/navigation'
 import DeliveryCompletion from './DeliveryCompletion'
+
+// Fix Leaflet default icon issue
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+})
 
 const ActiveDelivery = () => {
   const dispatch = useDispatch()
@@ -19,6 +29,7 @@ const ActiveDelivery = () => {
 
   const [showCallPrompt, setShowCallPrompt] = useState(false)
   const [batteryLevel, setBatteryLevel] = useState(null)
+  const [showMap, setShowMap] = useState(false)
 
   // Redirect if no active orders
   useEffect(() => {
@@ -81,6 +92,9 @@ const ActiveDelivery = () => {
     : { minutes: null, timeString: 'Calculating...' }
 
   const completedCount = activeOrders.filter((o) => o.status === 'delivered').length
+  const mapCenter = position
+    ? [position.lat, position.lng]
+    : [Number(currentOrder.delivery_lat), Number(currentOrder.delivery_lng)]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,13 +257,7 @@ const ActiveDelivery = () => {
             {/* Action Buttons */}
             <div className="grid grid-cols-2 gap-3 mt-6">
               <button
-                onClick={() =>
-                  openNavigation(
-                    currentOrder.delivery_lat,
-                    currentOrder.delivery_lng,
-                    currentOrder.delivery_address
-                  )
-                }
+                onClick={() => setShowMap((prev) => !prev)}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -260,7 +268,7 @@ const ActiveDelivery = () => {
                     d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
                   />
                 </svg>
-                NAVIGON
+                HARTA
               </button>
               <button
                 onClick={() =>
@@ -286,6 +294,46 @@ const ActiveDelivery = () => {
             </div>
           </div>
         </div>
+
+        {/* Live Map */}
+        {showMap && (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h3 className="font-bold text-gray-900">Harta Live</h3>
+              <span className="text-sm text-gray-600">
+                {position ? 'GPS aktive' : 'Duke pritur GPS'}
+              </span>
+            </div>
+            <div className="h-80">
+              <MapContainer center={mapCenter} zoom={14} style={{ height: '100%', width: '100%' }}>
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {position && (
+                  <Marker position={[position.lat, position.lng]}>
+                    <Popup>Kurieri</Popup>
+                  </Marker>
+                )}
+                <Marker position={[currentOrder.delivery_lat, currentOrder.delivery_lng]}>
+                  <Popup>{currentOrder.delivery_address}</Popup>
+                </Marker>
+                {position && (
+                  <Polyline
+                    positions={[
+                      [position.lat, position.lng],
+                      [currentOrder.delivery_lat, currentOrder.delivery_lng],
+                    ]}
+                    color="blue"
+                    weight={3}
+                    opacity={0.7}
+                    dashArray="10, 10"
+                  />
+                )}
+              </MapContainer>
+            </div>
+          </div>
+        )}
 
         {/* Queue */}
         {activeOrders.length > 1 && (
