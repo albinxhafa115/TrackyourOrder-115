@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import L from 'leaflet'
 import {
   fetchTodayOrders,
   startDelivery,
@@ -12,6 +14,14 @@ import { logout } from '../../store/slices/authSlice'
 import { formatDistance } from '../../utils/distance'
 import { format } from 'date-fns'
 
+// Fix Leaflet default icon issue
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+})
+
 const Dashboard = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -21,6 +31,20 @@ const Dashboard = () => {
   )
   const [showMapView, setShowMapView] = useState(false)
   const orders = Array.isArray(rawOrders) ? rawOrders : []
+  const mapOrders =
+    selectedOrders.length > 0
+      ? orders.filter((order) => selectedOrders.includes(order.id))
+      : orders
+  const mapPoints = mapOrders
+    .map((order) => {
+      const lat = Number(order.delivery_lat)
+      const lng = Number(order.delivery_lng)
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+      return { ...order, lat, lng }
+    })
+    .filter(Boolean)
+  const mapCenter =
+    mapPoints.length > 0 ? [mapPoints[0].lat, mapPoints[0].lng] : [42.6629, 21.1655]
 
   useEffect(() => {
     // Fetch today's orders on mount
@@ -181,6 +205,40 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
+
+            {/* Map View */}
+            {showMapView && (
+              <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
+                <div className="p-4 border-b flex items-center justify-between">
+                  <h3 className="font-bold text-gray-900">Pamja Harte</h3>
+                  <span className="text-sm text-gray-600">
+                    {mapPoints.length} pika
+                  </span>
+                </div>
+                {mapPoints.length === 0 ? (
+                  <div className="p-6 text-sm text-gray-600">
+                    Nuk ka koordinata per t'u shfaqur.
+                  </div>
+                ) : (
+                  <div className="h-80">
+                    <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }}>
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      {mapPoints.map((order) => (
+                        <Marker key={order.id} position={[order.lat, order.lng]}>
+                          <Popup>
+                            #{order.order_number}<br />
+                            {order.customer_name}
+                          </Popup>
+                        </Marker>
+                      ))}
+                    </MapContainer>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Actions */}
             <div className="sticky bottom-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">

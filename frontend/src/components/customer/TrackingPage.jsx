@@ -111,10 +111,19 @@ const TrackingPage = () => {
     return texts[status] || status
   }
 
+  const liveStatuses = new Set([
+    'out_for_delivery',
+    'in_transit',
+    'in_transport',
+    'in_delivery',
+    'started',
+  ])
+  const isLiveTracking = !!current_position && liveStatuses.has(order.status)
+
   const progressPercentage =
     order.status === 'delivered'
       ? 100
-      : order.status === 'out_for_delivery'
+      : isLiveTracking
       ? 65
       : order.status === 'confirmed'
       ? 33
@@ -158,7 +167,7 @@ const TrackingPage = () => {
           </div>
 
           {/* ETA & Distance */}
-          {order.status === 'out_for_delivery' && current_position && (
+          {isLiveTracking && (
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-primary-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Arrin për:</p>
@@ -175,7 +184,7 @@ const TrackingPage = () => {
         </div>
 
         {/* Live Map */}
-        {order.status === 'out_for_delivery' && current_position && (
+        {isLiveTracking && (
           <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6">
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-bold text-gray-900">Harta Live</h3>
