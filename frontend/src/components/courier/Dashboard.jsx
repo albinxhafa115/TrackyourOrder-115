@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   const handleStartDelivery = async () => {
     if (!courier?.id) {
-      alert('Të lutem kyçu përsëri.')
+      alert('Te lutem kycu perseri.')
       return
     }
     if (selectedOrders.length === 0) {

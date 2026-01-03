@@ -38,12 +38,14 @@ const toRadians = (degrees) => {
  */
 export const formatDistance = (distanceKm) => {
   if (distanceKm === null || distanceKm === undefined) return 'N/A'
+  const numericDistance = Number(distanceKm)
+  if (!Number.isFinite(numericDistance)) return 'N/A'
 
-  if (distanceKm < 1) {
-    return `${Math.round(distanceKm * 1000)}m`
+  if (numericDistance < 1) {
+    return `${Math.round(numericDistance * 1000)}m`
   }
 
-  return `${distanceKm.toFixed(1)}km`
+  return `${numericDistance.toFixed(1)}km`
 }
 
 /**
