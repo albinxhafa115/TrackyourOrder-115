@@ -1,0 +1,37 @@
+{
+  "name": "kuosht-gps-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Kuosht GPS Tracking System",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "node src/scripts/migrate.js",
+    "seed": "node src/scripts/seed.js",
+    "test": "jest"
+  },
+  "keywords": ["gps", "tracking", "delivery", "e-commerce"],
+  "author": "Kuosht",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "@sendgrid/mail": "^8.1.0",
+    "twilio": "^4.20.0",
+    "socket.io": "^4.6.0",
+    "node-cron": "^3.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  }
+}

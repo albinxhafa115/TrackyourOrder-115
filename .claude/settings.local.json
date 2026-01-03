@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(export PGPASSWORD=postgres)",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -f C:/Users/Surface/Desktop/Code115/TrackyourOrder-115/backend/migrations/001_initial_schema.sql)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(ipconfig:*)",
+      "Bash(where:*)",
+      "Bash(ngrok http:*)",
+      "Bash(start ngrok:*)",
+      "Bash(\"/c/Users/Surface/Desktop/Code115/TrackyourOrder-115/ngrok/ngrok.exe\" config add-authtoken 37iwOlQlLVnuT56itfdnGMjVe41_6koy8VmoBUew44dtv9JXJ)",
+      "Bash(npm run preview:*)",
+      "Bash(python:*)",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -c \"SELECT id, name, email FROM couriers;\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -c \"SELECT password_hash FROM couriers WHERE email=''leart@kuosht.com'';\")",
+      "Bash(node -e:*)",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -c \"UPDATE couriers SET password_hash = ''$2a$10$vE0k9j8gMc.V0H8YPdGAOuBOEyRO.sisaOR3uLSnHPybSncR8p/pC'' WHERE email=''leart@kuosht.com'';\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -c \"UPDATE couriers SET password_hash = ''$2a$10$8JIhNzxoFszvydZO7F0xcOB/Yv2bsQW/favUWbYKYwVy1EHt5ytN6'' WHERE email=''leart@kuosht.com'';\")",
+      "Bash(\"/c/Program Files/PostgreSQL/18/bin/psql.exe\" -U postgres -d kuosht_tracking -c \"SELECT id, email, status, LENGTH\\(password_hash\\) as hash_length FROM couriers WHERE email=''leart@kuosht.com'';\")",
+      "Bash(cat:*)",
+      "Bash(taskkill:*)",
+      "Bash(timeout:*)"
+    ]
+  }
+}

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .result {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            word-wrap: break-word;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Faqe - Kuosht GPS</h1>
+        <p>Kjo faqe teston nëse frontend po lidhet me backend.</p>
+
+        <h2>Test 1: API Connection</h2>
+        <button onclick="testAPI()">Testo API Connection</button>
+        <div id="api-result"></div>
+
+        <h2>Test 2: Login</h2>
+        <button onclick="testLogin()">Testo Login</button>
+        <div id="login-result"></div>
+
+        <h2>Test 3: Fetch Orders</h2>
+        <button onclick="testOrders()">Testo Orders</button>
+        <div id="orders-result"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://192.168.1.4:5000/api';
+        let authToken = null;
+
+        function showResult(elementId, message, isSuccess) {
+            const el = document.getElementById(elementId);
+            el.className = 'result ' + (isSuccess ? 'success' : 'error');
+            el.innerHTML = message;
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch(API_URL + '/track/KU20260102001');
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('api-result', '✅ API po punon!<br>Order: ' + data.order_number, true);
+                } else {
+                    showResult('api-result', '❌ API error: ' + response.status, false);
+                }
+            } catch (error) {
+                showResult('api-result', '❌ Error: ' + error.message, false);
+            }
+        }
+
+        async function testLogin() {
+            try {
+                const response = await fetch(API_URL + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'leart@kuosht.com',
+                        password: 'courier123'
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.token;
+                    showResult('login-result', '✅ Login sukses!<br>Courier: ' + data.courier.name + '<br>Token: ' + authToken.substring(0, 30) + '...', true);
+                } else {
+                    const error = await response.json();
+                    showResult('login-result', '❌ Login failed: ' + error.message, false);
+                }
+            } catch (error) {
+                showResult('login-result', '❌ Error: ' + error.message, false);
+            }
+        }
+
+        async function testOrders() {
+            if (!authToken) {
+                showResult('orders-result', '❌ Duhet të bësh login së pari!', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL + '/courier/orders/today', {
+                    headers: {
+                        'Authorization': 'Bearer ' + authToken
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult('orders-result', '✅ Orders loaded!<br>Total: ' + data.length + ' orders<br>' + JSON.stringify(data, null, 2), true);
+                } else {
+                    showResult('orders-result', '❌ Orders error: ' + response.status, false);
+                }
+            } catch (error) {
+                showResult('orders-result', '❌ Error: ' + error.message, false);
+            }
+        }
+    </script>
+</body>
+</html>
